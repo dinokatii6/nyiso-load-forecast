@@ -28,7 +28,7 @@ def build_gbm() -> HistGradientBoostingRegressor:
         max_leaf_nodes=31,
         min_samples_leaf=40,
         l2_regularization=1.0,
-        early_stopping=False,   # see note: sklearn's internal split is random
+        early_stopping=False,   
         random_state=42,
     )
 
@@ -53,12 +53,21 @@ def train_all() -> dict:
     gbm = build_gbm().fit(X_tr, y_tr)
     rows.append(score("GradientBoosting", y_va, gbm.predict(X_va)))
 
-    # Whichever naive baseline is harder becomes the bar to beat.
     baseline_name = min(rows[:2], key=lambda r: r["MAE_MW"])["model"]
 
     table = results_table(rows, baseline_name=baseline_name)
     print(f"\nValidation results (baseline: {baseline_name}):\n")
     print(table.to_string(index=False))
+    
+    # Final test evaluation
+    X_te, y_te = test[feats], test[TARGET]
+
+    test_pred = gbm.predict(X_te)
+
+    test_result = score("GradientBoosting", y_te, test_pred)
+
+    print("\nFinal test results:\n")
+    print(pd.DataFrame([test_result]).to_string(index=False))
 
     return {
         "ridge": ridge,
