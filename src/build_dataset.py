@@ -29,7 +29,8 @@ def load_demand() -> pd.Series:
 
 
 def load_weather() -> pd.DataFrame:
-    """Collapses per-site weather into one population-weighted series."""
+    """Weighted statewide series PLUS per-city temperature, so the model
+    can learn its own effective weighting instead of trusting our guess."""
     w = pd.read_csv(WEATHER_PATH)
     w["timestamp_utc"] = pd.to_datetime(w["timestamp_utc"], utc=True)
 
@@ -38,9 +39,15 @@ def load_weather() -> pd.DataFrame:
     frames = {}
     for col in WEATHER_COLS:
         wide = w.pivot(index="timestamp_utc", columns="site", values=col)
-        wide = wide[weights.index]            # align column order to the weights
-        # min_count=1 means an all-NaN hour stays NaN instead of becoming 0.
+        wide = wide[weights.index]
+
+        # statewide weighted average (interpretability, charts)
         frames[col] = wide.mul(weights, axis=1).sum(axis=1, min_count=1)
+
+        # per-city temperature (the model learns the real weighting)
+        if col == "temp_f":
+            for site in weights.index:
+                frames[f"temp_f_{site}"] = wide[site]
 
     return pd.DataFrame(frames)
 
