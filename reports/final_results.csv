@@ -1,5 +1,6 @@
 model,MAE_MW,RMSE_MW,MAPE_pct,vs_baseline_pct
 GradientBoosting,483.234,669.601,2.812,53.779
+PyTorch MLP,487.173,659.644,2.878,53.402
 Ridge,691.841,931.951,4.106,33.825
-Naive-24 (same hour yesterday),1045.477,1439.441,6.085,0.0
-Naive-168 (same hour last week),1731.38,2406.601,9.837,-65.607
+Naive-24,1045.477,1439.441,6.085,0.0
+Naive-168,1731.38,2406.601,9.837,-65.607
